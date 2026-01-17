@@ -1,6 +1,6 @@
 import streamlit as st
 
-from pages.baseflow import baseflow
+from src.baseflow import baseflow
 
 
 def rodape():

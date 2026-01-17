@@ -1,8 +1,8 @@
 import pandas as pd
 import streamlit as st
 
-from models.data import Station
-from models.viewer import Fig2D
+from tools.data import Station
+from tools.viewer import Fig2D
 
 
 def select_inline(lb, ops, key_id, index=0,  pc=0.5):
