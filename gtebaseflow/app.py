@@ -9,7 +9,7 @@ def rodape():
             "<p> All rights reserved.</p> </div>"
             )
     
-st.html('gtebaseflow/pages/style.css')
+st.html('gtebaseflow/src/style.css')
 
 pgs = st.navigation(pages=[baseflow], position="top")
 
