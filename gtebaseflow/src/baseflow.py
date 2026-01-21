@@ -3,11 +3,12 @@ import streamlit as st
 
 from tools.data import Station
 from tools.viewer import Fig2D
+from src import utils
 
 
-def load_about(files_up, row):
+def load_about(row):
     """Carrega a página sobre caso não haja arquivo carregado."""
-    if files_up == []:
+    if st.session_state.files_up_q == []:
         row.html('gtebaseflow/src/about.html')
 
 
@@ -180,16 +181,17 @@ def plot_chart(row02):
 def input_box(row01):
     """Entrada de arquivos."""
     with st.sidebar.expander("Arquivos de Entrada", expanded=True):
-        files_up = st.file_uploader('Carregue o(s) arquivo(s) de vazão:', type='xlsx',  accept_multiple_files=True)
-        load_about(files_up, row01)
-        files_byname = get_filenames(files_up)
-        filename = select_inline(lb="Arquivo:", ops=files_byname.keys(), key_id='filename_q')
-        shts_name = get_shtnames(filename, files_byname)
+        st.session_state.files_up_q = st.file_uploader('Carregue o(s) arquivo(s) de vazão:', 
+                                    type='xlsx',  accept_multiple_files=True, 
+                                    on_change=utils.get_files_byname)
+        load_about(row01)
+        filename = select_inline(lb="Arquivo:", ops=st.session_state.files_byname_q.keys(), key_id='filename_q')
+        shts_name = get_shtnames(filename, st.session_state.files_byname_q)
         sht_name = select_inline(lb="Planilha:", ops=shts_name, key_id='sht_name_q')
-        cols_name = get_colsname(files_byname, filename, sht_name)
+        cols_name = get_colsname(st.session_state.files_byname_q, filename, sht_name)
         col_datetime = select_inline(lb='Data:', ops=cols_name, index=None, key_id='col_datetime_q')
         col_streamflow = select_inline(lb='Vazão (m³/s):', ops=cols_name, index=None, key_id='col_streamflow_q')
-        load_station(files_byname, filename, sht_name, col_datetime, col_streamflow)
+        load_station(st.session_state.files_byname_q, filename, sht_name, col_datetime, col_streamflow)
 
         with st.expander('Precipitação'):
             st.info('Dados de precipitação são opcionais, porém enriquecem a análise.')
