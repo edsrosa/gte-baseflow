@@ -1,6 +1,6 @@
 import streamlit as st
 
-from src.baseflow import baseflow
+from src.page import baseflow
 from src.utils import start_session_states
 
 
