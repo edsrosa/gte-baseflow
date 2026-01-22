@@ -15,7 +15,7 @@ class Station():
         self.col_baseflow='baseflow' # Nome da coluna com fluxo de base
         self.name=None  # Nome da estação
         self.area_km2=None # Área da bacia em km²
-        self.df_ts=None # Dataframe com os dados time série
+        self.df_ts=None # Dataframe com os dados timeserie
     
     def set_parameters(self, file_obj, filename, sht_ts, col_datetime, col_streamflow):
         """Recupera os parâmetros para carregar a estação"""
@@ -95,3 +95,9 @@ class Station():
         self.calc_baseflow()
         self.calc_bfi()
         self.df_ts[self.col_baseflow] = self.baseflow
+
+    def classify_season(self, start_wet, start_dry):
+        """Faz classificação em período seco e chuvoso."""
+        self.df_ts['season'] = 'wet'
+        dry_br = (self.df_ts[self.col_datetime].dt.month >= start_dry) & (self.df_ts[self.col_datetime].dt.month < start_wet)
+        self.df_ts['season'] = self.df_ts['season'].mask(dry_br, 'dry')

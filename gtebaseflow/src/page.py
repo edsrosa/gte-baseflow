@@ -54,7 +54,7 @@ def get_configs(name_station, area_bacia, start_wet, start_dry):
 def classify_season(start_wet, start_dry):
     """Faz classificação dos períodos chuvoso e seco."""
     if 'station' in st.session_state:
-        classify = 'classes'
+        st.session_state.station.classify_season(start_wet, start_dry)
 
 
 def calc_baseflow(k):
