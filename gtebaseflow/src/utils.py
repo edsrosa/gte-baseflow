@@ -9,7 +9,6 @@ def start_session_states():
         if k not in st.session_state:
             st.session_state[k] = v
 
-
 def get_cols_types(df):
     """Retorna os tipos das colunas como um dicionario."""
     dtys = list(df.dtypes.unique())
@@ -21,25 +20,21 @@ def get_cols_types(df):
          dtypes_cols['all'].append(nm)
     return dtypes_cols
 
-
 def set_key_id(name, sufix_id):
     """Compõe chave"""
     return "_".join([name, sufix_id])
-
 
 def get_colsin(cols_in, cols_name, sufix_id):
     """Colunas necessárias"""
     for col, labels in cols_in.items():
         cols_in[col][1] = select_inline(lb=labels[0], ops=cols_name, index=None, key_id=set_key_id(col, sufix_id))
 
-
-def select_inline(lb, ops, key_id, index=0,  pc=0.5):
+def select_inline(lb, ops, key_id, index=0,  pc=0.25):
     """Gera entrada para selecionar nome de coluna."""
     c01, c02 = st.columns([pc, 1-pc])
     c01.write(lb)
     select_in = c02.selectbox(lb, options=ops, key=key_id, index=index, label_visibility='collapsed')
     return select_in
-
 
 def get_files_byname(files_up, multiple):
     """Recupera as propriedades do arquivo carregados."""
@@ -55,15 +50,13 @@ def get_files_byname(files_up, multiple):
         
     return files_byname
 
-
 def get_filename(files_byname, sufix_id):
     """Recupera o nome do arquivo atual."""
     filename = None
     if files_byname != {}:
-        filename = select_inline(lb="Arquivo: ", ops=files_byname.keys(), key_id=set_key_id('filename', sufix_id), index=0,  pc=0.5)
+        filename = select_inline(lb="Arquivo: ", ops=files_byname.keys(), key_id=set_key_id('filename', sufix_id), index=0)
 
     return filename
-
 
 def get_shtname(filename, files_byname, sufix_id):
     """Recupera o nome da aba atual."""
@@ -75,7 +68,6 @@ def get_shtname(filename, files_byname, sufix_id):
 
     return shtname
 
-
 def get_colsname(files_byname, filename, shtname):
     """Recupera o nome das colunas do arquivo atual."""
     cols_name = []
@@ -85,9 +77,9 @@ def get_colsname(files_byname, filename, shtname):
 
     return cols_name
 
-
-def choose_xlsx(title, label_up, cols_in={'name':['Nome:', None], 'datetime': ['Data:', None], 'value': ['Valor (unid):', None]}, sufix_id='01', multiple=True):
+def choose_xlsx(title='Input', label_up='Files', cols_in={'name':['Nome:', None], 'datetime': ['Data:', None], 'value': ['Valor:', None]}, sufix_id='01', multiple=True):
     """Expander com carregamento de arquivos xlsx."""
+
     with st.expander(title, expanded=True):
         files_up = st.file_uploader(label_up, 
                                     type='xlsx',  accept_multiple_files=multiple, 
@@ -101,7 +93,6 @@ def choose_xlsx(title, label_up, cols_in={'name':['Nome:', None], 'datetime': ['
 
         return files_byname, filename, shtname
 
-
 def get_value(label, key_values, key_id, index=None):
     """Recupera o tipo de dado"""
     value = select_inline(lb=label, ops=key_values.keys(), key_id=key_id, index=index)
@@ -111,7 +102,6 @@ def get_value(label, key_values, key_id, index=None):
     else:
         return key_values[value]
 
-
 def get_value_ops(label, value_in, value_ops, key_id):
     """Recupera a a opção a partir de uma lista de opções"""
     if value_in == None:
@@ -120,7 +110,6 @@ def get_value_ops(label, value_in, value_ops, key_id):
         ops = value_ops[value_in]
     op = select_inline(lb=label, ops=ops, key_id=key_id)
     return op
-
 
 def get_num_month(label, index, key_id):
     """Recupera mês de início do perído chuvoso e seco."""
@@ -138,7 +127,6 @@ def get_num_month(label, index, key_id):
                 'Dezembro':12}
     month = get_value(label=label, key_values=months, key_id=key_id, index=index)
     return month
-
 
 def get_type_plu(label, index, key_id):
     """Recupera o tipo de série histórica de precipitação."""
