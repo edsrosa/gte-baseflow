@@ -1,6 +1,4 @@
 nbformat
 numpy
 openpyxl
-pandas
 plotly
-streamlit
