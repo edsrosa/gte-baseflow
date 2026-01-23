@@ -1,4 +1,3 @@
-altair<5
 nbformat
 numpy
 openpyxl
