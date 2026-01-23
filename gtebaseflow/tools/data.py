@@ -46,7 +46,7 @@ class Station():
         """Calcula recessão inversa para um ponto."""
         a = self.a_k
         rr = rr_tn/a
-        if rr > y:
+        if rr > y or rr == 0:
             rr = y
         return rr
     
