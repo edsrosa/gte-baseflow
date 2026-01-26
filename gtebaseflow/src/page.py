@@ -80,7 +80,7 @@ def plot_chart(row02):
 def load_streamflow(row01):
     """Carregamento dos dados de vazão"""
     cols_in_q = {'datetime': ['Data:', None], 
-                'streamflow': ['vazão (m³/s):', None]}
+                'streamflow': ['Vazão (m³/s):', None]}
     files_byname_q, filename_q, shtname_q = utils.choose_xlsx(title="Vazão", 
                     label_up="Carregue os arquivos de vazão:",
                     cols_in=cols_in_q,
