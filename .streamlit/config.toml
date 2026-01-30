@@ -1,0 +1,11 @@
+[theme]
+primaryColor = '#178125'
+secondaryBackgroundColor = "rgb(243, 243, 243)"
+font = "arial"
+headingFont = "arial"
+codeFont = "arial"  
+textColor='#000000ff'
+[theme.sidebar]
+font = "arial"
+headingFont = "arial"
+baseRadius="full"
