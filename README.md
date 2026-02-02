@@ -31,19 +31,24 @@ Aplicação para separação de fluxo de base e análise de hidrogramas.
 ## Estrutura de Pastas
 
 ```sh
-gte-baseflow/ 
-├─ gtebaseflow/
-│  ├─ app.py
-│  ├─ src
-│  │  ├─ baseflow.py
-│  │  ├─ style.css
-│  │  └─ utils.py
-│  └─ tools
-│     ├─ data.py
-│     └─ viewer.py
-├─ examples/
-├─ .gitignore
-├─ LICENSE.txt
-├─ README.md
-└─ requirements.txt
+gtebaseflow/                #  
+├─ gtebaseflow/             #  
+├─ examples/                #  
+├─ .streamlit               #  
+│  └─ config.toml           #  
+│  ├─ src                   #  
+│  │  ├─ about.html         #  
+│  │  ├─ help.html          #  
+│  │  ├─ page.py            #  
+│  │  ├─ style.css          #  
+│  │  └─ utils.py           #  
+│  ├─ tools                 #  
+│  │  ├─ database.py        #  
+│  │  ├─  use.py            #  
+│  │  └─ viewer.py          #  
+│  └─ app.py                #  
+├─ .gitignore               #  
+├─ LICENSE                  #  
+├─ README.md                #  
+└─ requirements.txt         #  
 ```

@@ -6,7 +6,6 @@ from src.page import baseflow
 def rodape():
     st.html("<div class='footer'>"
             "<p><a href='https://github.com/edsrosa' target='_blank'>© 2026 Ednilson Rosa.</a></p>"
-            "<p>Todos os direitos reservados.</p>"
             "</div>"
             )
     
