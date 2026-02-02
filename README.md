@@ -31,24 +31,24 @@ Aplicação para separação de fluxo de base e análise de hidrogramas.
 ## Estrutura de Pastas
 
 ```sh
-gtebaseflow/                #  
-├─ gtebaseflow/             #  
-├─ examples/                #  
-├─ .streamlit               #  
-│  └─ config.toml           #  
-│  ├─ src                   #  
-│  │  ├─ about.html         #  
-│  │  ├─ help.html          #  
-│  │  ├─ page.py            #  
-│  │  ├─ style.css          #  
-│  │  └─ utils.py           #  
-│  ├─ tools                 #  
-│  │  ├─ database.py        #  
-│  │  ├─  use.py            #  
-│  │  └─ viewer.py          #  
-│  └─ app.py                #  
-├─ .gitignore               #  
-├─ LICENSE                  #  
-├─ README.md                #  
-└─ requirements.txt         #  
+gtebaseflow/
+├─ gtebaseflow/             #  Diretório principal da aplicação
+│  ├─ src/                  #  
+│  │  ├─ about.html         #  Conteúdo da página com o Sobre da aplicação
+│  │  ├─ help.html          #  Contéudo do texto de ajuda da aplicação
+│  │  ├─ page.py            #  Estruturação da página principal
+│  │  ├─ style.css          #  Folha de estilos CSS
+│  │  └─ utils.py           #  Chamada de ferramentas para montar a página
+│  ├─ tools/                #  
+│  │  ├─ database.py        #  Processamento de dados e arquivos
+│  │  ├─ use.py             #  Chamada das ferramentas de uso
+│  │  └─ viewer.py          #  Visualização de gráficos e mapas
+│  └─ app.py                #  Entry point principal para chamada da aplicação
+├─ examples/                #  Pasta com arquivos de exemplo de entrada e saída
+├─ .streamlit/              #  
+│  └─ config.toml           #  Configurações do Streamlit
+├─ .gitignore               #  Diretórios e arquivos a serem ignorados pelo Git
+├─ LICENSE                  #  Licença do projeto
+├─ README.md                #  README do projeto
+└─ requirements.txt         #  Dependências da aplicação
 ```
