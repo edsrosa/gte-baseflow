@@ -1,4 +1,5 @@
 import os
+
 import pandas as pd
 import streamlit as st
 
@@ -7,10 +8,11 @@ from tools import use
 
 def start_session_states():
     """Inicializa o session state"""
-    states = {'station': None}
+    states = {'station_sf': None}
     for k,v in states.items():
         if k not in st.session_state:
             st.session_state[k] = v
+
 
 def start_session(title, nrows=1):
     start_session_states()
@@ -21,16 +23,18 @@ def start_session(title, nrows=1):
         rows.append(st.container())
     return rows
 
+
 def clear_sessions(data):
     """Reinicializa os sessions states se o arquivo de entrada é retirada."""
-    if data == {}:
+    if data == None:
         st.session_state['station'] = None
 
 
 def load_about(data):
     """Carrega a página inicial sobre a ferramenta caso não haja arquivo carregado."""
-    if data == {}:
+    if data == None:
         st.html('gtebaseflow/src/about.html')
+
 
 def load_help():
     """Carrega a página de ajuda sobre a ferramenta."""
@@ -41,6 +45,7 @@ def set_key_id(name, sufix_id):
     """Compõe chave"""
     return "_".join([name, sufix_id])
 
+
 def select_inline(lb, ops, key_id, index=0,  pc=0.3):
     """Gera entrada para selecionar nome de coluna."""
     c01, c02 = st.columns([pc, 1-pc])
@@ -48,12 +53,14 @@ def select_inline(lb, ops, key_id, index=0,  pc=0.3):
     select_in = c02.selectbox(lb, options=ops, key=key_id, index=index, label_visibility='collapsed')
     return select_in
 
+
 def num_in_inline(lb, value, pc=0.3):
     """Entrada de número."""
     c01, c02 = st.columns([pc, 1-pc])
     c01.write(lb)
     num_in = c02.number_input(label=lb, value=value, label_visibility='collapsed')
     return num_in
+
 
 def get_colsin(cols_in, cols_name, sufix_id):
     """Colunas necessárias"""
@@ -74,12 +81,14 @@ def get_files_byname(files_up, multiple):
             files_byname[f.name] = f
     return files_byname
 
+
 def get_filename(files_byname, sufix_id):
     """Recupera o nome do arquivo atual."""
     filename = None
     if files_byname != {}:
         filename = select_inline(lb="Arquivo: ", ops=files_byname.keys(), key_id=set_key_id('filename', sufix_id), index=0)
     return filename
+
 
 def get_shtname(filename, files_byname, sufix_id):
     """Recupera o nome da aba atual."""
@@ -90,6 +99,7 @@ def get_shtname(filename, files_byname, sufix_id):
         shtname = select_inline(lb="Planilha:", ops=shtnames, key_id=set_key_id('shtname', sufix_id))
     return shtname
 
+
 def get_colsname(files_byname, filename, shtname):
     """Recupera o nome das colunas do arquivo atual."""
     cols_name = []
@@ -97,6 +107,7 @@ def get_colsname(files_byname, filename, shtname):
         df = pd.read_excel(files_byname[filename], sheet_name=shtname)
         cols_name = list(df.columns)
     return cols_name
+
 
 def choose_xlsx(title='Input', data_name='data', label_up='Files', cols_in={'name':['Nome:', None], 'datetime': ['Data:', None], 'value': ['Valor:', None]}, sufix_id='01', multiple=False):
     """Expander com carregamento de arquivos xlsx."""
@@ -110,15 +121,20 @@ def choose_xlsx(title='Input', data_name='data', label_up='Files', cols_in={'nam
         shtname = get_shtname(filename, files_byname, sufix_id)
         cols_name = get_colsname(files_byname, filename, shtname)
         get_colsin(cols_in, cols_name, sufix_id)
+        name_station = st.text_input(label='name_station', label_visibility='collapsed', placeholder='Nome da Estação', key=set_key_id(name='name', sufix_id=sufix_id))
 
         bt_load = st.button('Carregar Dados', type='primary', width='stretch', key=set_key_id(name='bt_load', sufix_id=sufix_id))
         if bt_load:
             df = pd.read_excel(files_byname[filename], sheet_name=shtname)
-            data = {'df': df, 'cols_in': cols_in}
-            st.session_state[data_name] = data
+            if data_name == 'station_sf':
+                station = use.create_station(df, cols_in, name_station)
+                st.session_state['station_sf'] = station
+            elif data_name == 'data_plu':
+                data = {'df': df, 'cols_in': cols_in, 'name': name_station}
+                st.session_state[data_name] = data
         
         if files_up is None or files_up == []:
-            st.session_state[data_name] = {}
+            st.session_state[data_name] = None
         
 
 def get_value(label, key_values, key_id, index=None):
@@ -129,6 +145,7 @@ def get_value(label, key_values, key_id, index=None):
         return value
     else:
         return key_values[value]
+
 
 def get_num_month(label, index, key_id):
     """Recupera mês de início do perído chuvoso e seco."""
@@ -148,14 +165,14 @@ def get_num_month(label, index, key_id):
     return month
 
 
-def apply_configs(name_station, area_bacia, start_wet, start_dry):
+def apply_configs(area_bacia, start_wet, start_dry):
     """Recupera as configurações."""
     bt_apply_configs = st.button("Carregar Configurações", width='stretch', type='primary')
 
     if bt_apply_configs:
-        station = use.create_station(st.session_state.data_sf, name_station, area_bacia)
-        use.classify_season_hydroyears(station, start_wet, start_dry)
-        st.session_state['station'] = station
+        use.insert_configs_station(st.session_state.station_sf, area_bacia)
+        use.classify_season_hydroyears(st.session_state.station_sf, start_wet, start_dry)
+
 
 def calc_baseflow(station):
     "Faz seleção do k e cálculo do baseflow."
@@ -163,12 +180,42 @@ def calc_baseflow(station):
     if station is not None:
         use.calc_baseflow(station, k_value)
 
-def plot_chart_sf(station, row):
+
+def select_time(row):
+    """Range slider com o período de plotagem dos gráficos"""
+    if st.session_state.station_sf is not None:
+        dates = use.get_dates_range(st.session_state.station_sf)
+        dates_plot = row.slider(label='Intervalo Data', 
+                                label_visibility='collapsed', 
+                                value=dates,
+                                format='DD/MM/YYYY')
+        return dates_plot
+
+
+def select_ymax_sf(row):
+    """Slider para o eixo y."""
+    if st.session_state.station_sf is not None:
+        y_max_sf = use.get_value_max_sf(st.session_state.station_sf)
+        y_plot_sf = row.slider(label="max_sf",
+                              label_visibility='collapsed',
+                              min_value=0,
+                              max_value=y_max_sf,
+                              value=y_max_sf)
+        return y_plot_sf
+
+
+def plot_chart_sf(station, row, range_x):
     """Plota o grafico gerado."""
     if station is not None:
-        fig_sf = use.create_chart_sf(station.df_ts, station.col_datetime, station.col_streamflow, station.col_baseflow, station.name)
+        fig_sf = use.create_chart_sf(station.df_ts, station.col_datetime, station.col_streamflow, station.col_baseflow, station.name, range_x)
         row.plotly_chart(fig_sf.fig)
 
+
+def plot_chart_plu(data_plu, row, range_x):
+    """Plota o grafico gerado."""
+    if data_plu is not None:
+        fig_plu = use.create_chart_plu(data_plu['df'], data_plu['cols_in']['datetime'][1], data_plu['cols_in']['rainfall'][1], name=data_plu['name'], range_x=range_x)
+        row.plotly_chart(fig_plu.fig)
 
 
 # old functions
@@ -183,6 +230,7 @@ def get_cols_types(df):
          dtypes_cols['all'].append(nm)
     return dtypes_cols
 
+
 def get_value_ops(label, value_in, value_ops, key_id):
     """Recupera a a opção a partir de uma lista de opções"""
     if value_in == None:
@@ -191,6 +239,7 @@ def get_value_ops(label, value_in, value_ops, key_id):
         ops = value_ops[value_in]
     op = select_inline(lb=label, ops=ops, key_id=key_id)
     return op
+
 
 def get_type_plu(label, index, key_id):
     """Recupera o tipo de série histórica de precipitação."""
