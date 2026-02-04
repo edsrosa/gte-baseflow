@@ -10,70 +10,13 @@
     <h1>GTE Baseflow</h1>
     <p>GTE Baseflow é uma ferramenta criada para análise de hidrogramas e separação de escoamento de base.</p>
     <p>O cálculo é baseado no filtro numérico proposto por Eckhardt (2005) e os parâmetros são estimados conforme Collischonn e Fan (2013).</p>
-    <p>No filtro proposto por Eckhardt (2005), o fluxo de base bi para o tempo i é dado pela equação:</p>
-    <p style="text-align: center;"> 
-    <math display="block">
-        <mrow>
-            <msub>
-                <mi>b</mi>
-                <mn>i</mn>
-            </msub>
-            <mo>=</mo>
-            <mfrac>
-                <mrow>
-                    <mrow>
-                        <mo>(</mo>
-                            <mi>1</mi>
-                            <mo>-</mo>
-                            <msub>
-                                <mi>BFi</mi>
-                                <mi>max</mi>
-                            </msub>
-                        <mo>)</mo>
-                    </mrow>
-                    <mrow>
-                        <mo>*</mo>
-                        <mn>a</mn>
-                        <mo>*</mo>
-                        <msub>
-                            <mi>b</mi>
-                            <mn>i-1</mn>
-                        </msub>
-                        <mo>*</mo>
-                        <mo>(</mo>
-                            <mn>1</mn>
-                            <mo>-</mo>
-                            <mi>a</mi>
-                        <mo>)</mo>
-                        <mo>*</mo>
-                        <msub>
-                            <mi>BFi</mi>
-                            <mn>max</mn>
-                        </msub>
-                        <mo>*</mo>
-                        <msub>
-                            <mi>y</mi>
-                            <mn>i</mn>
-                        </msub>
-                    </mrow>
+    <p>No filtro proposto por Eckhardt (2005), o fluxo de base b<sub>i</sub> para o tempo <i>i</i> é dado pela equação:</p>
 
-                </mrow>
-                <mrow>
-                    <mn>1</mn>
-                    <mo>-</mo>
-                    <mi>a</mi>
-                    <mo>*</mo>
-                    <msub>
-                        <mi>BFi</mi>
-                        <mi>max</mi>
-                    </msub>
-                </mrow>
-            </mfrac>
-        </mrow>
-    </math>
+    <p style="text-align: center;">
+        b<sub>i</sub> = ((1 - BFi<sub>max</sub>)*(a * b<sub>i-1</sub>) + (1 - a) * (BFi<sub>max</sub> * y<sub>i</sub>)) / (1 - a * BFi<sub>max</sub>)
     </p>
 
-    <p>na qual y<sub>i</sub> é a vazão do curso d’água no tempo <i>i</i> e b<sub>i-1</sub> é o fluxo de base no tempo <i>i-1</i> e o parâmetro <i>BFimax</i> é o máximo percentual de fluxo de base que o filtro permite calcular.</p>
+    <p>na qual y<sub>i</sub> é a vazão do curso d’água no tempo <i>i</i>, b<sub>i-1</sub> é o fluxo de base no tempo <i>i-1</i> e os parâmetros <i>a</i> e BFi<sub>max</sub>  dependem das características da bacia hidrográfica.</p>
     <p>A aplicação desse filtro considera que a vazão total y medida em um curso d’água em um tempo i é formada por uma componente de escoamento superficial f e uma componente de escoamento subterrâneo b:</p>
     <p style="text-align: center;"><em>y<sub>i</sub> = f<sub>i</sub> + b<sub>i</sub></em></p>
     <p>Durante o período de recessão, quando todo o fluxo do curso d’água é proveniente da descarga de águas subterrâneas e y<sub>i</sub> = b<sub>i</sub>, o comportamento da vazão no hidrograma pode ser representado pela equação exponencial:</p>
