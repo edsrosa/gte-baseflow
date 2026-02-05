@@ -5,12 +5,12 @@ from tools.database import StationPlu
 from tools.viewer import Fig2D
 
 
-def create_station(df, cols_in, name_station):
+def create_station(df, cols_in, name_station, filename_in):
     """Cria a Station e faz alguns tratamentos"""
     col_datetime = cols_in['datetime'][1]
     col_streamflow = cols_in['streamflow'][1]
     station = Station()
-    station.load_df(df, col_datetime, col_streamflow)
+    station.load_df(df, col_datetime, col_streamflow, filename_in)
     station.name=name_station
     return station
 

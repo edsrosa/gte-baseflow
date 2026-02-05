@@ -53,7 +53,7 @@ def process_box(rows):
 def output_box():
     """Exportação"""
     with st.sidebar.expander("Exportação dos Arquivos", expanded=True, icon=":material/download:"):
-        utils.download_file()
+        utils.download_file(st.session_state.station_sf, st.session_state.plot_wb)
 
 
 def help_box():

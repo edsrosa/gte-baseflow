@@ -1,3 +1,4 @@
+import os
 from math import exp
 import io
 
@@ -18,9 +19,11 @@ class Station():
         self.col_baseflow_vol="FluxoBaseVol"
         self.name=None  # Nome da estação
         self.area_km2=None # Área da bacia em km²
-        
+        self.filename_in=None
+        self.filename_out=None       
 
-    def load_df(self, df, col_datetime, col_streamflow):
+
+    def load_df(self, df, col_datetime, col_streamflow, filename_in):
         """Carrega os dados do dataframe."""
         self.col_datetime = col_datetime
         self.col_streamflow = col_streamflow
@@ -29,6 +32,8 @@ class Station():
         self.df_ts = df
         self.datetime = list(df[col_datetime])
         self.streamflow = list(df[col_streamflow])
+        self.filename_in = filename_in
+        self.filename_out = filename_in.replace('.xlsx', '_fluxo_base.xlsx')
 
 
     def classify_season(self, start_wet, start_dry):

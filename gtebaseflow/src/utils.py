@@ -129,7 +129,7 @@ def choose_xlsx(title='Input', data_name='data', label_up='Files', cols_in={'nam
         if bt_load:
             df = pd.read_excel(files_byname[filename], sheet_name=shtname)
             if data_name == 'station_sf':
-                station = use.create_station(df, cols_in, name_station)
+                station = use.create_station(df, cols_in, name_station, filename)
             elif data_name == 'station_plu':
                 station = use.create_station_plu(df, cols_in, name_station)
 
@@ -236,6 +236,16 @@ def plot_chart_wb(station, station_plu, row):
         row.plotly_chart(fig_wb.fig)
 
 
+def download_file(station, plot_wb):
+    """Cria e baixa arquivo com dfs."""
+    if plot_wb:
+        file = use.create_xlsx(station)
+        st.download_button('Baixar Dados', 
+                       data=file,
+                       file_name=station.filename_out,
+                       type="primary",
+                       width='stretch')
+
 # old functions
 def get_cols_types(df):
     """Retorna os tipos das colunas como um dicionario."""
@@ -272,17 +282,3 @@ def get_type_plu(label, index, key_id):
                 }
     type_plu = get_value(label=label, key_values=types_plu, key_id=key_id, index=index)
     return type_plu
-
-
-def create_file():
-    """Cria arquivo para baixar."""
-    file = use.create_xlsx(st.session_state.station_sf)
-    return file
-
-
-def download_file():
-    """Cria e baixa arquivo com dfs."""
-    st.download_button('Baixar Dados', 
-                       data=create_file,
-                       type="primary",
-                       width='stretch')
