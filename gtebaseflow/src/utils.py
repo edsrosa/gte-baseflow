@@ -8,7 +8,9 @@ from tools import use
 
 def start_session_states():
     """Inicializa o session state"""
-    states = {'station_sf': None}
+    states = {'station_sf': None, 
+              'station_plu': None,
+              'plot_wb': False}
     for k,v in states.items():
         if k not in st.session_state:
             st.session_state[k] = v
@@ -128,19 +130,18 @@ def choose_xlsx(title='Input', data_name='data', label_up='Files', cols_in={'nam
             df = pd.read_excel(files_byname[filename], sheet_name=shtname)
             if data_name == 'station_sf':
                 station = use.create_station(df, cols_in, name_station)
-                st.session_state['station_sf'] = station
-            elif data_name == 'data_plu':
-                data = {'df': df, 'cols_in': cols_in, 'name': name_station}
-                st.session_state[data_name] = data
+            elif data_name == 'station_plu':
+                station = use.create_station_plu(df, cols_in, name_station)
+
+            st.session_state[data_name] = station
         
         if files_up is None or files_up == []:
             st.session_state[data_name] = None
-        
+
 
 def get_value(label, key_values, key_id, index=None):
     """Recupera o tipo de dado"""
     value = select_inline(lb=label, ops=key_values.keys(), key_id=key_id, index=index)
-
     if value == None:
         return value
     else:
@@ -170,6 +171,7 @@ def apply_configs(area_bacia, start_wet, start_dry):
     bt_apply_configs = st.button("Carregar Configurações", width='stretch', type='primary')
 
     if bt_apply_configs:
+        st.session_state['wet_dry'] = {'wet': start_wet, 'dry': start_dry}
         use.insert_configs_station(st.session_state.station_sf, area_bacia)
         use.classify_season_hydroyears(st.session_state.station_sf, start_wet, start_dry)
 
@@ -204,6 +206,15 @@ def select_ymax_sf(row):
         return y_plot_sf
 
 
+def calc_wb():
+    """Faz cálculos da precipitação, como parte dos cálculos do balanço."""
+    use.calc_volume_sf(st.session_state.station_sf)
+    if st.session_state.station_plu is not None:
+        use.classify_season_hydroyears_plu(st.session_state.station_plu, st.session_state.wet_dry['wet'],st.session_state.wet_dry['dry'])
+        use.calc_rainfall_sum_vol(st.session_state.station_plu, st.session_state.station_sf.area_km2)
+        use.join_sf_plu(st.session_state.station_sf, st.session_state.station_plu)
+
+ 
 def plot_chart_sf(station, row, range_x):
     """Plota o grafico gerado."""
     if station is not None:
@@ -211,11 +222,18 @@ def plot_chart_sf(station, row, range_x):
         row.plotly_chart(fig_sf.fig)
 
 
-def plot_chart_plu(data_plu, row, range_x):
+def plot_chart_plu(station, row, range_x):
     """Plota o grafico gerado."""
-    if data_plu is not None:
-        fig_plu = use.create_chart_plu(data_plu['df'], data_plu['cols_in']['datetime'][1], data_plu['cols_in']['rainfall'][1], name=data_plu['name'], range_x=range_x)
+    if station is not None:
+        fig_plu = use.create_chart_plu(station.df_ts, station.col_datetime, station.col_rainfall, name=station.name, range_x=range_x)
         row.plotly_chart(fig_plu.fig)
+
+
+def plot_chart_wb(station, station_plu, row):
+    """Plota o grafico gerado."""
+    if station is not None:
+        fig_wb = use.create_chart_wb(station.df_hy, station.col_yearhydro, station.col_streamflow_vol, station.col_baseflow_vol, station_plu.col_rainfall_vol, name=station.name)
+        row.plotly_chart(fig_wb.fig)
 
 
 # old functions
@@ -254,3 +272,17 @@ def get_type_plu(label, index, key_id):
                 }
     type_plu = get_value(label=label, key_values=types_plu, key_id=key_id, index=index)
     return type_plu
+
+
+def create_file():
+    """Cria arquivo para baixar."""
+    file = use.create_xlsx(st.session_state.station_sf)
+    return file
+
+
+def download_file():
+    """Cria e baixa arquivo com dfs."""
+    st.download_button('Baixar Dados', 
+                       data=create_file,
+                       type="primary",
+                       width='stretch')

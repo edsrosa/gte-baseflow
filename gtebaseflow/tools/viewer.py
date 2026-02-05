@@ -17,6 +17,7 @@ class Fig2D():
         self.traces=[]
         self.fig=None
 
+
     def layout_base(self):
         """Cria um mapa base onde os elementos serão plotados."""
         layout = dict(margin=dict(t=40, b=10, l=10, r=10),
@@ -26,16 +27,27 @@ class Fig2D():
             )
         return layout
 
+
     def load_traces_sf(self, dates, streamflows, baseflows):
         """Carrega os traces para plotagem."""
         streamflow_trace = go.Scatter(x=dates, y=streamflows, name='Fluxo Total', mode='lines', marker_color="#6583e9")
         baseflow_trace = go.Scatter(x=dates, y=baseflows, name='Fluxo de Base', mode='lines', marker_color="#df5151")
         self.traces = [streamflow_trace, baseflow_trace]
 
+
     def load_traces_plu(self, dates, rainfalls):
         """Carrega os traces para plotagem."""
         rainfall_trace = go.Bar(x=dates, y=rainfalls, name='Precipitação', marker_color="#1A88D1")
         self.traces = [rainfall_trace]
+
+
+    def load_traces_wb(self, yearhydros, streamflows, baseflows, rainfalls):
+        """Carrega os traces para plotagem."""
+        streamflows_trace = go.Scatter(x=yearhydros, y=streamflows, name='Fluxo Total', mode='lines', marker_color="#6583e9")
+        baseflow_trace = go.Scatter(x=yearhydros, y=baseflows, name='Fluxo de Base', mode='lines', marker_color="#df5151")
+        rainfalls_trace = go.Scatter(x=yearhydros, y=rainfalls, name='Precipitação', mode='lines', marker_color="#6ee965")
+        self.traces = [baseflow_trace, streamflows_trace, rainfalls_trace]
+
 
     def create_fig(self):
         """Gera a figura."""
@@ -43,8 +55,8 @@ class Fig2D():
         if self.traces != []:
             for trace in self.traces:
                 fig.add_trace(trace)
-        
         self.fig = fig
+
 
     def update_layout(self, title):
         """Atualizações no layout da figura caso haja dados."""
@@ -88,3 +100,18 @@ class Fig2D():
         self.fig.update_layout(layout_title, height=150)
         self.fig.update_xaxes(range=range_x)
         self.fig.update_yaxes(title='Precipitação (mm)')
+
+
+    def update_layout_wb(self, title):
+        """Atualizações no layout da figura caso haja dados."""
+        layout_title = dict(title=dict(text=title, xref='paper', xanchor='center', x=0.5)
+                            )
+        self.fig.update_layout(layout_title, 
+                               legend=dict(orientation='h',
+                                           xanchor='center',
+                                           x=0.5,
+                                           y=-0.3
+                                            ),
+                                height=500,
+                                )
+        self.fig.update_yaxes(title='Volume (m³)')
