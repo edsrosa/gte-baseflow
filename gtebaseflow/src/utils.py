@@ -26,10 +26,12 @@ def start_session(title, nrows=1):
     return rows
 
 
-def clear_sessions(data):
-    """Reinicializa os sessions states se o arquivo de entrada é retirada."""
-    if data == None:
-        st.session_state['station'] = None
+def clear_sessions(station):
+    """Reinicializa os sessions states se o arquivo de entrada é trocado."""
+    if station is not None and station.df_hy is not None:
+        st.session_state['plot_wb'] = True
+    else:
+        st.session_state['plot_wb'] = False
 
 
 def load_about(data):
@@ -69,9 +71,22 @@ def get_colsin(cols_in, cols_name, sufix_id):
     for col, labels in cols_in.items():
         cols_in[col][1] = select_inline(lb=labels[0], ops=cols_name, index=None, key_id=set_key_id(col, sufix_id))
 
+def check_colsin(cols_in):
+    """Checa se as colunas de entrada foram selecionadas."""
+    cols_value = []
+    for col in cols_in.values():
+        cols_value.append(col[1])
+    
+    check = False
+    if None in cols_value:
+        check = True
+    
+    return check
+
 
 def get_files_byname(files_up, multiple):
-    """Recupera as propriedades do arquivo carregados."""
+    """Recupera as propriedades do arquivo carregados em um dicionário.
+    Ou retorna um dicionario vazio."""
     files_byname  = {}
     if multiple:
         files_in = files_up.copy()
@@ -85,7 +100,8 @@ def get_files_byname(files_up, multiple):
 
 
 def get_filename(files_byname, sufix_id):
-    """Recupera o nome do arquivo atual."""
+    """Recupera o nome do arquivo atual.
+    Ou retorna None."""
     filename = None
     if files_byname != {}:
         filename = select_inline(lb="Arquivo: ", ops=files_byname.keys(), key_id=set_key_id('filename', sufix_id), index=0)
@@ -93,7 +109,8 @@ def get_filename(files_byname, sufix_id):
 
 
 def get_shtname(filename, files_byname, sufix_id):
-    """Recupera o nome da aba atual."""
+    """Recupera o nome da aba atual.
+    Ou retorna None."""
     shtname = None
     if filename is not None and files_byname != {}:
         file = files_byname[filename]
@@ -103,7 +120,8 @@ def get_shtname(filename, files_byname, sufix_id):
 
 
 def get_colsname(files_byname, filename, shtname):
-    """Recupera o nome das colunas do arquivo atual."""
+    """Recupera o nome das colunas do arquivo atual.
+    Ou retorna uma lista vazia."""
     cols_name = []
     if shtname is not None:
         df = pd.read_excel(files_byname[filename], sheet_name=shtname)
@@ -111,9 +129,9 @@ def get_colsname(files_byname, filename, shtname):
     return cols_name
 
 
-def choose_xlsx(title='Input', data_name='data', label_up='Files', cols_in={'name':['Nome:', None], 'datetime': ['Data:', None], 'value': ['Valor:', None]}, sufix_id='01', multiple=False):
+def choose_xlsx(title='Input', data_name='data', label_up='Files', cols_in={'name':['Nome:', None], 'datetime': ['Data:', None], 'value': ['Valor:', None]}, sufix_id='01', multiple=False, box_expanded=True):
     """Expander com carregamento de arquivos xlsx."""
-    with st.expander(title, expanded=False):
+    with st.expander(title, expanded=box_expanded):
         files_up = st.file_uploader(set_key_id(name=label_up, sufix_id=sufix_id), 
                                     type='xlsx',  accept_multiple_files=multiple, 
                                     label_visibility='collapsed'
@@ -124,8 +142,7 @@ def choose_xlsx(title='Input', data_name='data', label_up='Files', cols_in={'nam
         cols_name = get_colsname(files_byname, filename, shtname)
         get_colsin(cols_in, cols_name, sufix_id)
         name_station = st.text_input(label='name_station', label_visibility='collapsed', placeholder='Nome da Estação', key=set_key_id(name='name', sufix_id=sufix_id))
-
-        bt_load = st.button('Carregar Dados', type='primary', width='stretch', key=set_key_id(name='bt_load', sufix_id=sufix_id))
+        bt_load = st.button('Carregar Dados', type='primary', width='stretch', key=set_key_id(name='bt_load', sufix_id=sufix_id), disabled=check_colsin(cols_in))
         if bt_load:
             df = pd.read_excel(files_byname[filename], sheet_name=shtname)
             if data_name == 'station_sf':
@@ -166,14 +183,11 @@ def get_num_month(label, index, key_id):
     return month
 
 
-def apply_configs(area_bacia, start_wet, start_dry):
+def apply_configs(station, start_wet, start_dry):
     """Recupera as configurações."""
-    bt_apply_configs = st.button("Carregar Configurações", width='stretch', type='primary')
-
-    if bt_apply_configs:
-        st.session_state['wet_dry'] = {'wet': start_wet, 'dry': start_dry}
-        use.insert_configs_station(st.session_state.station_sf, area_bacia)
-        use.classify_season_hydroyears(st.session_state.station_sf, start_wet, start_dry)
+    st.session_state['wet_dry'] = {'wet': start_wet, 'dry': start_dry}
+    if station is not None:
+        use.classify_season_hydroyears(station, start_wet, start_dry)
 
 
 def calc_baseflow(station):
@@ -206,19 +220,21 @@ def select_ymax_sf(row):
         return y_plot_sf
 
 
-def calc_wb():
+def calc_wb(station, area_bacia):
     """Faz cálculos da precipitação, como parte dos cálculos do balanço."""
-    use.calc_volume_sf(st.session_state.station_sf)
-    if st.session_state.station_plu is not None:
-        use.classify_season_hydroyears_plu(st.session_state.station_plu, st.session_state.wet_dry['wet'],st.session_state.wet_dry['dry'])
-        use.calc_rainfall_sum_vol(st.session_state.station_plu, st.session_state.station_sf.area_km2)
-        use.join_sf_plu(st.session_state.station_sf, st.session_state.station_plu)
-
+    if station is not None:
+        use.insert_configs_station(station, area_bacia)
+        use.calc_volume_sf(st.session_state.station_sf)
+        if st.session_state.station_plu is not None:
+            use.classify_season_hydroyears_plu(st.session_state.station_plu, st.session_state.wet_dry['wet'], st.session_state.wet_dry['dry'])
+            use.calc_rainfall_sum_vol(st.session_state.station_plu, st.session_state.station_sf.area_km2)
+            use.join_sf_plu(st.session_state.station_sf, st.session_state.station_plu)
+    
  
-def plot_chart_sf(station, row, range_x):
+def plot_chart_sf(station, row, range_x, wet_dry, show_season):
     """Plota o grafico gerado."""
     if station is not None:
-        fig_sf = use.create_chart_sf(station.df_ts, station.col_datetime, station.col_streamflow, station.col_baseflow, station.name, range_x)
+        fig_sf = use.create_chart_sf(station.df_ts, station.col_datetime, station.col_streamflow, station.col_baseflow, station.name, range_x, start_wet=wet_dry['wet'], start_dry=wet_dry['dry'], show_season=show_season)
         row.plotly_chart(fig_sf.fig)
 
 
@@ -232,8 +248,14 @@ def plot_chart_plu(station, row, range_x):
 def plot_chart_wb(station, station_plu, row):
     """Plota o grafico gerado."""
     if station is not None:
-        fig_wb = use.create_chart_wb(station.df_hy, station.col_yearhydro, station.col_streamflow_vol, station.col_baseflow_vol, station_plu.col_rainfall_vol, name=station.name)
-        row.plotly_chart(fig_wb.fig)
+        if station_plu is None:
+            col_rainfall_vol = None
+        else:
+            col_rainfall_vol = station_plu.col_rainfall_vol
+        if station.df_hy is not None:
+            st.session_state.plot_wb = True
+            fig_wb = use.create_chart_wb(station.df_hy, station.col_yearhydro, station.col_streamflow_vol, station.col_baseflow_vol, col_rainfall_vol, name=station.name)
+            row.plotly_chart(fig_wb.fig)
 
 
 def download_file(station, plot_wb):

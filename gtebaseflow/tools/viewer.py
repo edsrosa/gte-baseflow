@@ -45,8 +45,10 @@ class Fig2D():
         """Carrega os traces para plotagem."""
         streamflows_trace = go.Scatter(x=yearhydros, y=streamflows, name='Fluxo Total', mode='lines', marker_color="#6583e9")
         baseflow_trace = go.Scatter(x=yearhydros, y=baseflows, name='Fluxo de Base', mode='lines', marker_color="#df5151")
-        rainfalls_trace = go.Scatter(x=yearhydros, y=rainfalls, name='Precipitação', mode='lines', marker_color="#6ee965")
-        self.traces = [baseflow_trace, streamflows_trace, rainfalls_trace]
+        self.traces = [baseflow_trace, streamflows_trace,]
+        if rainfalls is not None:
+            rainfalls_trace = go.Scatter(x=yearhydros, y=rainfalls, name='Precipitação', mode='lines', marker_color="#6ee965")
+            self.traces.append(rainfalls_trace)
 
 
     def create_fig(self):
@@ -95,9 +97,9 @@ class Fig2D():
 
     def update_layout_plu(self, title, range_x):
         """Atualizações no layout da figura caso haja dados."""
-        layout_title = dict(title=dict(text=title, xref='paper', xanchor='center', x=0.5, yanchor='bottom', y=0.87,)
+        layout_title = dict(title=dict(text=title, xref='paper', xanchor='center', x=0.5)
                             )
-        self.fig.update_layout(layout_title, height=150)
+        self.fig.update_layout(layout_title, height=250)
         self.fig.update_xaxes(range=range_x)
         self.fig.update_yaxes(title='Precipitação (mm)')
 
@@ -115,3 +117,10 @@ class Fig2D():
                                 height=500,
                                 )
         self.fig.update_yaxes(title='Volume (m³)')
+
+    def plot_wet_dry(self, year_min, year_max, start_wet, start_dry):
+        """Plota sazonalidade no gráfico."""
+        for year in range(year_min, year_max):
+            date_i = pd.to_datetime(f"{year}-{start_wet}-01")
+            date_f = pd.to_datetime(f"{year+1}-{start_dry}-01") - pd.Timedelta(1, unit="D")
+            self.fig.add_vrect(x0=date_i, x1=date_f, fillcolor="green", opacity=0.2)

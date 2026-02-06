@@ -12,7 +12,7 @@ def load_input_streamflow():
 def load_input_rainfall():
     """Carregamento dos dados de precipitação."""
     cols_in_plu={'datetime':['Data:', None], 'rainfall': ['Precipitação (mm):', None]}
-    utils.choose_xlsx(title="Precipitação", cols_in=cols_in_plu, sufix_id='plu', data_name='station_plu')
+    utils.choose_xlsx(title="Precipitação", cols_in=cols_in_plu, sufix_id='plu', data_name='station_plu', box_expanded=False)
 
 
 def input_box():
@@ -25,26 +25,29 @@ def input_box():
 def config_box():
     """Configurações."""
     with st.sidebar.expander("Configurações", expanded=True, icon=":material/settings:"):
-        area_bacia = st.number_input(label='area_bacia', label_visibility='collapsed', placeholder='Área de Bacia (km²)', min_value=0.0000001, value=None, format="%0.6f")
         start_wet = utils.get_num_month(label='Início Período Chuvoso:', index=9, key_id='start_wet')
         start_dry = utils.get_num_month(label='Início Período Seco:', index=3, key_id='start_dry')
-        utils.apply_configs(area_bacia, start_wet, start_dry)
+        st.session_state['show_season'] = st.checkbox('Exibir no Gráfico', value=True)
+        utils.apply_configs(st.session_state.station_sf, start_wet, start_dry)
 
 
 def process_box(rows):
     """Processamento"""
     with st.sidebar.expander("Processamento", expanded=True, icon=":material/view_kanban:"):
+        
         utils.calc_baseflow(st.session_state.station_sf)
         dates_plot = utils.select_time(rows[2])
         
-        utils.plot_chart_sf(st.session_state.station_sf, rows[1], dates_plot)
-        show_plu = st.checkbox('Plotar gráfico de precipitação')
-        if show_plu:
-            utils.plot_chart_plu(st.session_state.station_plu, rows[0], dates_plot)
+        utils.plot_chart_sf(st.session_state.station_sf, rows[1], dates_plot, st.session_state.wet_dry, st.session_state.show_season)
+        
+        area_bacia = st.number_input(label='area_bacia', label_visibility='collapsed', placeholder='Área de Bacia (km²)', min_value=0.0000001, value=None, format="%0.6f")
+        utils.plot_chart_plu(st.session_state.station_plu, rows[0], dates_plot)
         bt_calc_wb = st.button("Calcular Balanço Hídrico", width='stretch', type='primary')
         if bt_calc_wb:
-            utils.calc_wb()
+            utils.calc_wb(st.session_state.station_sf, area_bacia)
             st.session_state.plot_wb = True
+
+        utils.clear_sessions(st.session_state.station_sf)
 
         if st.session_state.plot_wb:
             utils.plot_chart_wb(st.session_state.station_sf, st.session_state.station_plu, rows[2])

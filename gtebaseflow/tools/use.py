@@ -78,15 +78,19 @@ def join_sf_plu(station_sf, station_plu):
     station_sf.join_plu(station_plu.df_hy, station_plu.col_yearhydro)
 
 
-def create_chart_sf(df_ts, col_datetime, col_streamflow, col_baseflow, name, range_x):
+def create_chart_sf(df_ts, col_datetime, col_streamflow, col_baseflow, name, range_x, start_wet, start_dry, show_season):
     """Cria o gráfico para plotar."""
     fig_sf = Fig2D()
     dates = df_ts[col_datetime]
     streamflows = df_ts[col_streamflow]
     baseflows = df_ts[col_baseflow]
+    year_min = df_ts[col_datetime].min().year - 1 
+    year_max = df_ts[col_datetime].max().year + 1
     fig_sf.load_traces_sf(dates, streamflows, baseflows)
     fig_sf.create_fig()
     fig_sf.update_layout_sf(title=name, range_x=range_x)
+    if show_season:
+        fig_sf.plot_wet_dry(year_min, year_max, start_wet, start_dry)
     return fig_sf
 
 
@@ -107,7 +111,10 @@ def create_chart_wb(df_hy, col_yearhydro, col_streamflow_vol, col_baseflow_vol, 
     yearhydros = df_hy[col_yearhydro]
     streamflows = df_hy[col_streamflow_vol]
     baseflows = df_hy[col_baseflow_vol]
-    rainfalls = df_hy[col_rainfall_vol]
+    if col_rainfall_vol is None or col_rainfall_vol not in df_hy.columns:
+        rainfalls = None
+    else:
+        rainfalls = df_hy[col_rainfall_vol]
 
     fig_wb.load_traces_wb(yearhydros, streamflows, baseflows, rainfalls)
     fig_wb.create_fig()

@@ -12,11 +12,11 @@ class Station():
         self.df_hy=None # Dataframe com dados agrupados por ano hidrológico.
         self.col_datetime=None # Nome da coluna data
         self.col_streamflow=None # Nome da coluna com vazão
-        self.col_baseflow='FluxoBase' # Nome da coluna com fluxo de base
+        self.col_baseflow='FluxoBase_m3s' # Nome da coluna com fluxo de base
         self.col_season='Periodo'
         self.col_yearhydro='AnoHidrologico'
-        self.col_streamflow_vol="FluxoTotalVol"
-        self.col_baseflow_vol="FluxoBaseVol"
+        self.col_streamflow_vol="FluxoTotal_m3"
+        self.col_baseflow_vol="FluxoBase_m3"
         self.name=None  # Nome da estação
         self.area_km2=None # Área da bacia em km²
         self.filename_in=None
@@ -33,7 +33,7 @@ class Station():
         self.datetime = list(df[col_datetime])
         self.streamflow = list(df[col_streamflow])
         self.filename_in = filename_in
-        self.filename_out = filename_in.replace('.xlsx', '_fluxo_base.xlsx')
+        self.filename_out = filename_in.replace('.xlsx', '_calculado.xlsx')
 
 
     def classify_season(self, start_wet, start_dry):
